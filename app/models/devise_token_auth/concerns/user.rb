@@ -1,4 +1,5 @@
 require 'bcrypt'
+require 'mongoid-locker'
 
 module DeviseTokenAuth::Concerns::User
   extend ActiveSupport::Concern
@@ -15,6 +16,7 @@ module DeviseTokenAuth::Concerns::User
   end
 
   included do
+    include Mongoid::Locker
     # Hack to check if devise is already enabled
     unless self.method_defined?(:devise_modules)
       devise :database_authenticatable, :registerable,
@@ -23,17 +25,17 @@ module DeviseTokenAuth::Concerns::User
       self.devise_modules.delete(:omniauthable)
     end
 
-    unless tokens_has_json_column_type?
-      serialize :tokens, JSON
-    end
+    # unless tokens_has_json_column_type?
+    #   serialize :tokens, JSON
+    # end
 
     if DeviseTokenAuth.default_callbacks
       include DeviseTokenAuth::Concerns::UserOmniauthCallbacks
     end
 
     # can't set default on text fields in mysql, simulate here instead.
-    after_save :set_empty_token_hash
-    after_initialize :set_empty_token_hash
+    # after_save :set_empty_token_hash
+    # after_initialize :set_empty_token_hash
 
     # get rid of dead tokens
     before_save :destroy_expired_tokens
@@ -90,22 +92,22 @@ module DeviseTokenAuth::Concerns::User
     end
   end
 
-  module ClassMethods
-    protected
+  # module ClassMethods
+  #   protected
 
 
-    def tokens_has_json_column_type?
-      database_exists? && table_exists? && self.columns_hash['tokens'] && self.columns_hash['tokens'].type.in?([:json, :jsonb])
-    end
+  #   def tokens_has_json_column_type?
+  #     database_exists? && table_exists? && self.columns_hash['tokens'] && self.columns_hash['tokens'].type.in?([:json, :jsonb])
+  #   end
 
-    def database_exists?
-      ActiveRecord::Base.connection
-    rescue ActiveRecord::NoDatabaseError
-      false
-    else
-      true
-    end
-  end
+  #   def database_exists?
+  #     ActiveRecord::Base.connection
+  #   rescue ActiveRecord::NoDatabaseError
+  #     false
+  #   else
+  #     true
+  #   end
+  # end
 
 
   def valid_token?(token, client_id='default')
@@ -158,7 +160,8 @@ module DeviseTokenAuth::Concerns::User
       updated_at && last_token &&
 
       # ensure that previous token falls within the batch buffer throttle time of the last request
-      Time.parse(updated_at) > Time.now - DeviseTokenAuth.batch_request_buffer_throttle &&
+      # Time.parse(updated_at) > Time.now - DeviseTokenAuth.batch_request_buffer_throttle &&
+      updated_at > Time.now - DeviseTokenAuth.batch_request_buffer_throttle &&
 
       # ensure that the token is valid
       ::BCrypt::Password.new(last_token) == token

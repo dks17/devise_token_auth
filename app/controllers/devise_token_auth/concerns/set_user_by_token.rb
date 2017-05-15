@@ -58,7 +58,8 @@ module DeviseTokenAuth::Concerns::SetUserByToken
     return false unless @token
 
     # mitigate timing attacks by finding by uid instead of auth token
-    user = uid && rc.find_by(uid: uid)
+    # user = uid && rc.find_by(uid: uid)
+    user = uid && rc.where(uid: uid).first
 
     if user && user.valid_token?(@token, @client_id)
       # sign_in with bypass: true will be deprecated in the next version of Devise
@@ -145,6 +146,7 @@ module DeviseTokenAuth::Concerns::SetUserByToken
     !params[:unbatch] &&
     user.tokens[client_id] &&
     user.tokens[client_id]['updated_at'] &&
-    Time.parse(user.tokens[client_id]['updated_at']) > @request_started_at - DeviseTokenAuth.batch_request_buffer_throttle
+    # Time.parse(user.tokens[client_id]['updated_at']) > @request_started_at - DeviseTokenAuth.batch_request_buffer_throttle
+    user.tokens[client_id]['updated_at'] > @request_started_at - DeviseTokenAuth.batch_request_buffer_throttle
   end
 end
