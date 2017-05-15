@@ -72,7 +72,11 @@ module DeviseTokenAuth
           clean_up_passwords @resource
           render_create_error
         end
-      rescue ActiveRecord::RecordNotUnique
+      # rescue ActiveRecord::RecordNotUnique
+      #   clean_up_passwords @resource
+      #   render_create_error_email_already_exists
+      # end
+      rescue ActiveModel::Errors
         clean_up_passwords @resource
         render_create_error_email_already_exists
       end
