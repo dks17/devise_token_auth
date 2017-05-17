@@ -236,9 +236,12 @@ module DeviseTokenAuth::Concerns::User
   end
 
   def token_validation_response
+    # self.as_json(except: [
+    #   :tokens, :created_at, :updated_at
+    # ])
     self.as_json(except: [
-      :tokens, :created_at, :updated_at
-    ])
+      :tokens, :created_at, :updated_at, :_id
+    ]).merge(id: self._id.to_s)
   end
 
 
