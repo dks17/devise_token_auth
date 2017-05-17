@@ -3,7 +3,14 @@ module DeviseTokenAuth
     include DeviseTokenAuth::Concerns::SetUserByToken
 
     def resource_data(opts={})
-      response_data = opts[:resource_json] || @resource.as_json
+      # except _id field
+      # except short fields name for created_at and updated_at
+      # add id field and
+      response_data = opts[:resource_json]|| @resource
+        .as_json(except: [:_id, :c_at, :u_at], methods: [:created_at, :updated_at])
+        .merge(id: @resource._id.to_s)
+      
+      # response_data = opts[:resource_json] || @resource.as_json
       if is_json_api
         response_data['type'] = @resource.class.name.parameterize
       end
