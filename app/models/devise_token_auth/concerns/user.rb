@@ -240,7 +240,7 @@ module DeviseTokenAuth::Concerns::User
     #   :tokens, :created_at, :updated_at
     # ])
     self.as_json(except: [
-      :tokens, :created_at, :updated_at, :_id
+      :tokens, :created_at, :updated_at, :_id, :u_at, :c_at
     ]).merge(id: self._id.to_s)
   end
 
