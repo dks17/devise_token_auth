@@ -76,8 +76,9 @@ module DeviseTokenAuth
       @resource = resource_class.reset_password_by_token({
         reset_password_token: resource_params[:reset_password_token]
       })
-
-      if @resource && @resource.id
+      
+      # if @resource && @resource.id
+      if @resource.errors.empty?
         client_id  = SecureRandom.urlsafe_base64(nil, false)
         token      = SecureRandom.urlsafe_base64(nil, false)
         token_hash = BCrypt::Password.create(token)

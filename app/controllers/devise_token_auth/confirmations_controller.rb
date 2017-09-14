@@ -4,7 +4,7 @@ module DeviseTokenAuth
       @resource = resource_class.confirm_by_token(params[:confirmation_token])
 
       # if @resource && @resource.id
-      if !@resource.errors.present?
+      if @resource.errors.empty?
         # create client id
         client_id  = SecureRandom.urlsafe_base64(nil, false)
         token      = SecureRandom.urlsafe_base64(nil, false)
